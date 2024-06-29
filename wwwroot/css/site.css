@@ -20,3 +20,9 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.title_image {
+    width: 400px;
+    height: 150px;
+    object-fit: cover;
+}

@@ -27,6 +27,16 @@ namespace ASP.NET_Classwork.Controllers
         {
             return View();
         }
+        
+        public IActionResult Razor()
+        {
+            return View();
+        }
+        public IActionResult UrlInfo()
+        {
+            return View();
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
