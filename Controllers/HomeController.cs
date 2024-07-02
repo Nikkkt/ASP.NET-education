@@ -1,4 +1,6 @@
 using ASP.NET_Classwork.Models;
+using ASP.NET_Classwork.Services.Hash;
+using ASP.NET_Classwork.Services.OTP;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,11 +8,21 @@ namespace ASP.NET_Classwork.Controllers
 {
     public class HomeController : Controller
     {
+        // приклад інжекції - _logger
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        // інжектуємо на (хеш-)сервіс
+        private readonly IHashService _hashService;
+
+        private readonly IOtpService _otpService;
+
+        public HomeController(ILogger<HomeController> logger, IHashService hashService, IOtpService otpService)
         {
             _logger = logger;
+            _hashService = hashService;
+            _otpService = otpService;
+            // Інжекція через конструктор - найбільш рекомендований варіант
+            // Контейнер служб (інжектор) аналізує параметри конструктора і сам підставляє до нього необхідні об'єкти (інстанси) служб
         }
 
         public IActionResult Index()
@@ -32,8 +44,16 @@ namespace ASP.NET_Classwork.Controllers
         {
             return View();
         }
+
         public IActionResult UrlInfo()
         {
+            return View();
+        }
+
+        public IActionResult Ioc()
+        {
+            ViewData["hash"] = _hashService.Digest("123");
+            ViewData["password"] = _otpService.GeneratePassword();
             return View();
         }
 

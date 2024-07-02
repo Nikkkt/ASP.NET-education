@@ -22,7 +22,7 @@ body {
 }
 
 .title_image {
-    width: 400px;
-    height: 150px;
+    width: 200px;
+    height: 130px;
     object-fit: cover;
 }
