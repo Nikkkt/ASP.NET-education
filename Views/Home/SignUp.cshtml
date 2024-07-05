@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "SignUp";
+}
+
+<div class="text-center">
+    <img class="title_image" src="/img/asp.net.png" alt="ASP logo" />
+    <h1 class="display-4">Реєстрація користувача</h1>
+</div>
+
+<br />
+
+<form>
+    <div class="row">
+        <div class="col col-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="email-addon"><i class="bi bi-at"></i></span>  
+                <input name="user-email" type="text" class="form-control" placeholder="Ел. пошта" aria-label="Ел. пошта" aria-describedby="email-addon">
+            </div>
+        </div>
+        <div class="col col-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="name-addon"><i class="bi bi-person-vcard"></i></span>
+                <input name="user-name" type="text" class="form-control" placeholder="Ваше ім'я" aria-label="Ваше ім'я" aria-describedby="name-addon">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col col-6"></div>
+        <div class="col col-6"></div>
+    </div>
+    <div class="row">
+        <div class="col col-6"></div>
+        <div class="col col-6">
+            <button type="submit" class="btn btn-outline-secondary">Реєстрація</button>
+        </div>
+    </div>
+</form>

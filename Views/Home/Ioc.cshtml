@@ -1,4 +1,11 @@
-﻿@{
+﻿@* 
+    Це інжекція сервісу (служби) в Razor 
+    !! це тільки для демонстрації, практика погана !!
+*@
+
+@inject ASP.NET_Classwork.Services.Hash.IHashService hashService
+@inject ASP.NET_Classwork.Services.FileName.IFileNameService fileNameService
+@{
     ViewData["Title"] = "Ioc";
 }
 
@@ -26,10 +33,34 @@
     <li>Замінюємо клас в інструкції реєстрації сервісу (Program.cs)</li>
 </ul>
 <p>
-    hash = @ViewData["hash"]
+    hash (from controller) = @ViewData["hash"] <br />
+    hash (from view) = @hashService.Digest("123") <br />
+    hashCode (from controller) = @ViewData["hashCode"] <br />
+    hashCode (from view) = @hashService.GetHashCode()
+</p>
+
+<h3>Часи існування служб (Service Scopes)</h3>
+<p>
+    Деякі об'єкти служби нормально себе поводять, якщо створюються тільки один раз, наприклад, служба хешування, генератор випадкових сутностей. 
+    Інші об'єкти можуть вимагати перестворення з новими запитами, наприклад, служби пов'язані з доступом користувачів (новий запит - новий користувач - нова служба). 
+    Деякі об'єкти взагалі одноразові, тобто не передбачають повторне використання.
+    Ці часові області "життя" об'єктів і називають Service Scopes. А до задач IoC (інверсії управління) належить також управління життєвим циклом служб.
+</p>
+<p>
+    Розрізняється декілька способів реєстрації служб: <br />
+    <code>AddSingleton</code> - об'єкт залишається незмінним максимально довго, навіть при оновленні сторінки. <br />
+    <code>AddScoped</code> - об'єкт залишається незмінним протягом одного запиту (Request), при оновленні сторінки змінюється. <br />
+    <code>AddTransient</code> - об'єкт змінюється при кожному зверненні - усі запити інжекції одержать різні об'єкти.
 </p>
 
 <h3>Домашнє завдання №2</h3>
 <p>
     password = @ViewData["password"]
 </p>
+
+<h3>Домашнє завдання №3</h3>
+<p>
+    filename 1 = @ViewData["fileName"] <br />
+    filename 2 = @fileNameService.GenerateFileName(10)
+</p>
+

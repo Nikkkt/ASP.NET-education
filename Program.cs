@@ -1,5 +1,8 @@
+using ASP.NET_Classwork.Services.FileName;
 using ASP.NET_Classwork.Services.Hash;
+using ASP.NET_Classwork.Services.KDF;
 using ASP.NET_Classwork.Services.OTP;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +15,15 @@ builder.Services.AddControllersWithViews();
 
 //builder.Services.AddSingleton<IHashService, Md5HashService>();
 builder.Services.AddSingleton<IHashService, ShaHashService>();
+builder.Services.AddSingleton<IKdfService, Pbkdf1Service>();
 
 // Homework 2
 //builder.Services.AddSingleton<IOtpService, Otp6Service>();
 builder.Services.AddSingleton<IOtpService, Otp4Service>();
+
+// Homework 3
+// Було використано Transient, щоб при кожному запиті генерувались різні імена
+builder.Services.AddTransient<IFileNameService, FileNameService>();
 
 var app = builder.Build();
 
