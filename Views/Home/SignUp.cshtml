@@ -1,4 +1,6 @@
-﻿@{
+﻿@* Для моделі вказуємо лише тип, сама модель доступна через поле Model *@
+@model ASP.NET_Classwork.Models.Home.SignUpPageModel
+@{
     ViewData["Title"] = "SignUp";
 }
 
@@ -9,18 +11,18 @@
 
 <br />
 
-<form>
+<form enctype="application/x-www-form-urlencoded" asp-action="RegUser" method="post">
     <div class="row">
         <div class="col col-6">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="email-addon"><i class="bi bi-at"></i></span>  
-                <input name="user-email" type="text" class="form-control" placeholder="Ел. пошта" aria-label="Ел. пошта" aria-describedby="email-addon">
+                <input name="user-email" type="text" class="form-control" placeholder="Ел. пошта" aria-label="Ел. пошта" aria-describedby="email-addon" value="@(Model.FormModel?.UserEmail)">
             </div>
         </div>
         <div class="col col-6">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="name-addon"><i class="bi bi-person-vcard"></i></span>
-                <input name="user-name" type="text" class="form-control" placeholder="Ваше ім'я" aria-label="Ваше ім'я" aria-describedby="name-addon">
+                <input name="user-name" type="text" class="form-control" placeholder="Ваше ім'я" aria-label="Ваше ім'я" aria-describedby="name-addon" value="@(Model.FormModel?.UserName)">
             </div>
         </div>
     </div>
@@ -35,3 +37,12 @@
         </div>
     </div>
 </form>
+
+@if (ViewData["data"] == null)
+{
+    <p>Немає попередніх даних</p>
+}
+else
+{
+    <p>@ViewData["data"]</p>
+}
