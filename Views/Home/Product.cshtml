@@ -15,13 +15,31 @@
         <div class="col col-6">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="name-addon"><i class="bi bi-body-text"></i></span>
-                <input name="product-name" type="text" class="form-control" placeholder="Назва товару" aria-label="Назва товару" aria-describedby="name-addon" value="@(Model.FormModel?.Name)">
+                @{
+                    String nameClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.Name)] == null ? "is-valid" : "is-invalid";
+                }
+                <input name="product-name" type="text" class="form-control @nameClass" placeholder="Назва товару" aria-label="Назва товару" aria-describedby="name-addon" value="@(Model.FormModel?.Name)">
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.Name)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.Name)]
+                    </div>
+                }
             </div>
         </div>
         <div class="col col-6">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="description-addon"><i class="bi bi-person-vcard"></i></span>
-                <textarea name="product-description" type="text" class="form-control" placeholder="Опис" aria-label="Опис" aria-describedby="description-addon" value="@(Model.FormModel?.Description)"></textarea>
+                @{
+                    String descriptionClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.Description)] == null ? "is-valid" : "is-invalid";
+                }
+                <textarea name="product-description" type="text" class="form-control @descriptionClass" placeholder="Опис" aria-label="Опис" aria-describedby="description-addon" value="@(Model.FormModel?.Description)"></textarea>
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.Description)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.Description)]
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -29,13 +47,31 @@
         <div class="col col-6">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="price-addon"><i class="bi bi-body-text"></i></span>
-                <input name="product-price" type="number" class="form-control" placeholder="Ціна товару" aria-label="Ціна товару" aria-describedby="price-addon" value="@(Model.FormModel?.Price)">
+                @{
+                    String priceClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.Price)] == null ? "is-valid" : "is-invalid";
+                }
+                <input name="product-price" type="number" class="form-control @priceClass" placeholder="Ціна товару" aria-label="Ціна товару" aria-describedby="price-addon" value="@(Model.FormModel?.Price)">
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.Price)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.Price)]
+                    </div>
+                }
             </div>
         </div>
         <div class="col col-6">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="amount-addon"><i class="bi bi-person-vcard"></i></span>
-                <input name="product-amount" type="number" class="form-control" placeholder="Кіл-ть товару" aria-label="Кіл-ть товару" aria-describedby="amount-addon" value="@(Model.FormModel?.Amount)">
+                @{
+                    String amountClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.Amount)] == null ? "is-valid" : "is-invalid";
+                }
+                <input name="product-amount" type="number" class="form-control @amountClass" placeholder="Кіл-ть товару" aria-label="Кіл-ть товару" aria-describedby="amount-addon" value="@(Model.FormModel?.Amount)">
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.Amount)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.Amount)]
+                    </div>
+                }
             </div>
         </div>
     </div>

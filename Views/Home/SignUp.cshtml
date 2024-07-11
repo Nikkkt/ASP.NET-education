@@ -15,23 +15,82 @@
     <div class="row">
         <div class="col col-6">
             <div class="input-group mb-3">
-                <span class="input-group-text" id="email-addon"><i class="bi bi-at"></i></span>  
-                <input name="user-email" type="text" class="form-control" placeholder="Ел. пошта" aria-label="Ел. пошта" aria-describedby="email-addon" value="@(Model.FormModel?.UserEmail)">
+                <span class="input-group-text" id="email-addon"><i class="bi bi-at"></i></span>
+                @{ String emailClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.UserEmail)] == null ? "is-valid" : "is-invalid"; }
+                <input name="user-email" type="text" class="form-control @emailClass" placeholder="Ел. пошта" aria-label="Ел. пошта" aria-describedby="email-addon" value="@(Model.FormModel?.UserEmail)">
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.UserEmail)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.UserEmail)]
+                    </div>
+                }
+                
             </div>
         </div>
         <div class="col col-6">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="name-addon"><i class="bi bi-person-vcard"></i></span>
-                <input name="user-name" type="text" class="form-control" placeholder="Ваше ім'я" aria-label="Ваше ім'я" aria-describedby="name-addon" value="@(Model.FormModel?.UserName)">
+                @{
+                    String nameClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.UserName)] == null ? "is-valid" : "is-invalid";
+                }
+                <input name="user-name" type="text" class="form-control @nameClass" placeholder="Ваше ім'я" aria-label="Ваше ім'я" aria-describedby="name-addon" value="@(Model.FormModel?.UserName)">
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.UserName)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.UserName)]
+                    </div>
+                }
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col col-6"></div>
-        <div class="col col-6"></div>
+        <div class="col col-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="password-addon"><i class="bi bi-lock"></i></span>
+                @{
+                    String passwordClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.UserPassword)] == null ? "is-valid" : "is-invalid";
+                }
+                <input name="user-password" type="password" class="form-control @passwordClass" placeholder="Пароль" aria-label="Пароль" aria-describedby="password-addon">
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.UserPassword)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.UserPassword)]
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col col-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="repeat-addon"><i class="bi bi-unlock"></i></span>
+                @{
+                    String repeatClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.UserRepeat)] == null ? "is-valid" : "is-invalid";
+                }
+                <input name="user-repeat" type="password" class="form-control @repeatClass" placeholder="Повтор паролю" aria-label="Повтор паролю" aria-describedby="repeat-addon">
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.UserRepeat)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.UserRepeat)]
+                    </div>
+                }
+            </div>
+        </div>
     </div>
     <div class="row">
-        <div class="col col-6"></div>
+        <div class="col col-6">
+            <div class="form-check form-switch">
+                @{
+                    String agreeClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.isAgree)] == null ? "is-valid" : "is-invalid";
+                }
+                <input name="is-agree" class="form-check-input @agreeClass" value="true" type="checkbox" role="switch" id="rulesSwitch">  
+                <label class="form-check-label" for="rulesSwitch">Згоден з правилами сайту</label>
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.isAgree)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.isAgree)]
+                    </div>
+                }
+            </div>
+        </div>
         <div class="col col-6">
             <button type="submit" class="btn btn-outline-secondary">Реєстрація</button>
         </div>
@@ -45,4 +104,12 @@
 else
 {
     <p>@ViewData["data"]</p>
+}
+
+@if (Model.ValidationErrors != null)
+{
+    foreach (var pair in Model.ValidationErrors)
+    {
+        <p>@pair.Key --- @(pair.Value ?? "OK")</p>
+    }
 }

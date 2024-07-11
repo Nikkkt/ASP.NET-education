@@ -7,6 +7,7 @@ using ASP.NET_Classwork.Services.OTP;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace ASP.NET_Classwork.Controllers
 {
@@ -77,6 +78,8 @@ namespace ASP.NET_Classwork.Controllers
                 var formModel = JsonSerializer.Deserialize<SignUpFormModel>(HttpContext.Session.GetString("signup-data")!)!;
 
                 model.FormModel = formModel;
+                model.ValidationErrors = _Validate(formModel);
+
                 ViewData["data"] = $"email: {formModel.UserEmail}, name: {formModel.UserName}";
 
                 // Видаляємо дані з сесії, щоб уникнути повторного оброблення
@@ -126,6 +129,8 @@ namespace ASP.NET_Classwork.Controllers
                 var formModel = JsonSerializer.Deserialize<ProductFormModel>(HttpContext.Session.GetString("product-data")!)!;
 
                 model.FormModel = formModel;
+                model.ValidationErrors = _ValidateProduct(formModel);
+
                 ViewData["productData"] = $"name: {formModel.Name}, description: {formModel.Description}, price: {formModel.Price}, amount: {formModel.Amount}";
 
                 HttpContext.Session.Remove("product-data");
@@ -143,6 +148,75 @@ namespace ASP.NET_Classwork.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private Dictionary<String, String?> _ValidateProduct(ProductFormModel model)
+        {
+            Dictionary<String, String?> res = new();
+
+            var nameRegex = new Regex(@"^\w{2,}(\s+\w{2,})*$");
+            res[nameof(model.Name)] = String.IsNullOrEmpty(model.Name) ? "Не допускається порожнє поле" : nameRegex.IsMatch(model.Name) ? null : "Введіть коректне ім'я";
+
+            res[nameof(model.Description)] = String.IsNullOrEmpty(model.Description) ? "Не допускається порожнє поле" : null;
+
+            res[nameof(model.Price)] = model.Price < 0 ? "Ціна не може бути менша за 0" : null;
+
+            res[nameof(model.Amount)] = model.Amount < 0 ? "Кількість не може бути менша за 0" : null;
+
+            return res;
+        }
+
+        private Dictionary<String, String?> _Validate(SignUpFormModel model)
+        {
+            // Валідація - це перевірка даних на відповідність певним шаблонам
+            // Результат валідації - {
+            //                          "UserEmail": null,           null - результат успішної валідації
+            //                          "UserName": "too short"      значення - повідомлення про помилку
+            //                       }
+            Dictionary<String, String?> res = new();
+            var emailRegex = new Regex(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$");
+            res[nameof(model.UserEmail)] = String.IsNullOrEmpty(model.UserEmail) ? "Не допускається порожнє поле" : emailRegex.IsMatch(model.UserEmail) ? null : "Введіть коректну адресу";
+
+            var nameRegex = new Regex(@"^\w{2,}(\s+\w{2,})*$");
+            res[nameof(model.UserName)] = String.IsNullOrEmpty(model.UserName) ? "Не допускається порожнє поле" : nameRegex.IsMatch(model.UserName) ? null : "Введіть коректне ім'я";
+
+            if (String.IsNullOrEmpty(model.UserPassword)) {
+                res[nameof(model.UserPassword)] = "Не допускається порожнє поле";
+            }
+            else if (model.UserPassword.Length < 3)
+            {
+                res[nameof(model.UserPassword)] = "Пароль має бути не коротшим за 3 символи";
+            }
+            else  
+            {
+                List<String> parts = [];
+                if (!Regex.IsMatch(model.UserPassword, @"\d")) 
+                { 
+                    parts.Add(" одну цифру"); 
+                }
+                if (!Regex.IsMatch(model.UserPassword, @"\D"))
+                {
+                    parts.Add(" одну літеру");
+                }
+                if (!Regex.IsMatch(model.UserPassword, @"\W"))
+                {
+                    parts.Add(" один спецсимвол");
+                }
+                if (parts.Count > 0)
+                {
+                    res[nameof(model.UserPassword)] = "Пароль повинен містити щонайменше" + String.Join(',', parts);
+                }
+                else
+                {
+                    res[nameof(model.UserPassword)] = null;
+                }
+            }
+
+            res[nameof(model.UserRepeat)] = String.IsNullOrEmpty(model.UserRepeat) ? "Не допускається порожнє поле" : model.UserPassword == model.UserRepeat ? null : "Паролі не збігаються";
+
+            res[nameof(model.isAgree)] = model.isAgree ? null : "Необхідно прийняти правила сайту";
+
+            return res;
         }
     }
 }
