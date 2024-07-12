@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 
 namespace ASP.NET_Classwork.Models.Product
 {
@@ -15,6 +16,10 @@ namespace ASP.NET_Classwork.Models.Product
         
         [FromForm(Name = "product-amount")]
         public int Amount { get; set; } = 0;
+
+        [JsonIgnore]
+        [FromForm(Name = "product-picture")]
+        public IFormFile Picture { get; set; } = null;
 
     }
 }

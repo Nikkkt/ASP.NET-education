@@ -4,6 +4,7 @@ using ASP.NET_Classwork.Models.Product;
 using ASP.NET_Classwork.Services.FileName;
 using ASP.NET_Classwork.Services.Hash;
 using ASP.NET_Classwork.Services.OTP;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
@@ -22,6 +23,12 @@ namespace ASP.NET_Classwork.Controllers
         private readonly IOtpService _otpService;
 
         private readonly IFileNameService _fileNameService;
+
+        private String fileErrorKey = "file-error";
+        private String fileNameKey = "file-name";
+
+        private String productFileErrorKey = "file-error";
+        private String productFileNameKey = "file-name";
 
         public HomeController(ILogger<HomeController> logger, IHashService hashService, IOtpService otpService, IFileNameService fileNameService)
         {
@@ -82,6 +89,13 @@ namespace ASP.NET_Classwork.Controllers
 
                 ViewData["data"] = $"email: {formModel.UserEmail}, name: {formModel.UserName}";
 
+                // Ім'я завантаженого файлу (аватарки) також зберігаються у сесії
+                if (HttpContext.Session.Keys.Contains(fileNameKey))
+                {
+                    ViewData["avatar"] = HttpContext.Session.GetString(fileNameKey);
+                    HttpContext.Session.Remove(fileNameKey);
+                }
+
                 // Видаляємо дані з сесії, щоб уникнути повторного оброблення
                 HttpContext.Session.Remove("signup-data");
             }
@@ -103,6 +117,42 @@ namespace ASP.NET_Classwork.Controllers
 
         public IActionResult RegUser(SignUpFormModel formModel) {
             HttpContext.Session.SetString("signup-data", JsonSerializer.Serialize(formModel));
+
+            if (formModel.UserAvatar != null)
+            {
+                // 1. Відокремити розширення файлу
+                int dotPosition = formModel.UserAvatar.FileName.IndexOf(".");
+                if (dotPosition == -1) // немає розширення файлу
+                {
+                    HttpContext.Session.SetString(fileErrorKey, "Файли без розширення не приймаються");
+                }
+                else
+                {
+                    String ext = formModel.UserAvatar.FileName[dotPosition..];
+                    // 2. Перевірити розширення на перелік дозволених
+                    String[] extentions = [".jpg", ".png", ".bmp"];
+                    if (!extentions.Contains(ext))
+                    {
+                        HttpContext.Session.SetString(fileErrorKey, "Не приймається розширення файлу");
+                    }
+                    else
+                    {
+                        // 3. Сформувати ім'я файлу, переконатись, що ми не перекривається наявний файл
+                        String filename;
+                        String path = "./Uploads/User"; // "./wwwroot/img/upload/";
+                        do
+                        {
+                            filename = new FileNameService().GenerateFileName(16) + ext;
+                        } while (System.IO.File.Exists(path + filename));
+
+                        // 4. Зберегти файл, зберегти у БД ім'я файлу
+                        using Stream writer = new StreamWriter(path + filename).BaseStream;
+                        formModel.UserAvatar.CopyTo(writer);
+
+                        HttpContext.Session.SetString(fileNameKey, filename);
+                    }
+                }
+            }
             return RedirectToAction(nameof(SignUp));
 
             // ViewData["data"] = $"email: {formModel.UserEmail}, name: {formModel.UserName}";
@@ -133,6 +183,12 @@ namespace ASP.NET_Classwork.Controllers
 
                 ViewData["productData"] = $"name: {formModel.Name}, description: {formModel.Description}, price: {formModel.Price}, amount: {formModel.Amount}";
 
+                if (HttpContext.Session.Keys.Contains(productFileNameKey))
+                {
+                    ViewData["picture"] = HttpContext.Session.GetString(productFileNameKey);
+                    HttpContext.Session.Remove(productFileNameKey);
+                }
+
                 HttpContext.Session.Remove("product-data");
             }
             return View(model);
@@ -141,6 +197,33 @@ namespace ASP.NET_Classwork.Controllers
         public IActionResult AddProduct(ProductFormModel formModel)
         {
             HttpContext.Session.SetString("product-data", JsonSerializer.Serialize(formModel));
+
+            if (formModel.Picture != null)
+            {
+                int dotPosition = formModel.Picture.FileName.IndexOf(".");
+                if (dotPosition == -1) HttpContext.Session.SetString(productFileErrorKey, "Файли без розширення не приймаються");
+                else
+                {
+                    String ext = formModel.Picture.FileName[dotPosition..];
+                    String[] extentions = [".jpg", ".png", ".bmp"];
+                    if (!extentions.Contains(ext)) HttpContext.Session.SetString(productFileErrorKey, "Не приймається розширення файлу");
+                    else
+                    {
+                        String filename;
+                        String path = "./Uploads/Product/";
+                        do
+                        {
+                            filename = new FileNameService().GenerateFileName(16) + ext;
+                        } while (System.IO.File.Exists(path + filename));
+
+                        using Stream writer = new StreamWriter(path + filename).BaseStream;
+                        formModel.Picture.CopyTo(writer);
+
+                        HttpContext.Session.SetString(productFileNameKey, filename);
+                    }
+                }
+            }
+
             return RedirectToAction(nameof(Product));
         }
 
@@ -148,6 +231,30 @@ namespace ASP.NET_Classwork.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult Download([FromRoute] String id) 
+        {
+            // id - закладена в маршрутизаторі назва, суть - ім'я файлу
+            String filename = $"./Uploads/User/{id}";
+            if (System.IO.File.Exists(filename))
+            {
+                var stream = new StreamReader(filename).BaseStream;
+                return File(stream, "image/png");
+            }
+            return NotFound();
+        }
+
+        public IActionResult DownloadProduct([FromRoute] String id)
+        {
+            // id - закладена в маршрутизаторі назва, суть - ім'я файлу
+            String filename = $"./Uploads/Product/{id}";
+            if (System.IO.File.Exists(filename))
+            {
+                var stream = new StreamReader(filename).BaseStream;
+                return File(stream, "image/png");
+            }
+            return NotFound();
         }
 
         private Dictionary<String, String?> _ValidateProduct(ProductFormModel model)
@@ -162,6 +269,12 @@ namespace ASP.NET_Classwork.Controllers
             res[nameof(model.Price)] = model.Price < 0 ? "Ціна не може бути менша за 0" : null;
 
             res[nameof(model.Amount)] = model.Amount < 0 ? "Кількість не може бути менша за 0" : null;
+
+            if (HttpContext.Session.Keys.Contains(productFileErrorKey))
+            {
+                res[nameof(model.Picture)] = HttpContext.Session.GetString(productFileErrorKey);
+                HttpContext.Session.Remove(productFileErrorKey);
+            }
 
             return res;
         }
@@ -215,6 +328,13 @@ namespace ASP.NET_Classwork.Controllers
             res[nameof(model.UserRepeat)] = String.IsNullOrEmpty(model.UserRepeat) ? "Не допускається порожнє поле" : model.UserPassword == model.UserRepeat ? null : "Паролі не збігаються";
 
             res[nameof(model.isAgree)] = model.isAgree ? null : "Необхідно прийняти правила сайту";
+
+            // результати перевірки файлу збережені у сесії
+            if (HttpContext.Session.Keys.Contains(fileErrorKey))
+            {
+                res[nameof(model.UserAvatar)] = HttpContext.Session.GetString(fileErrorKey);
+                HttpContext.Session.Remove(fileErrorKey);
+            }
 
             return res;
         }

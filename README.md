@@ -20,3 +20,7 @@
 # Homework 5
 
 ![Homework 5](./github/6.png)
+
+# Homework 6
+
+![Homework 6](./github/7.png)

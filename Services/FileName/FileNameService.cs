@@ -4,7 +4,7 @@
     {
         public string GenerateFileName(int length)
         {
-            const string allowedChars = "abcdefghijklmnopqrstuvwxyz";
+            const string allowedChars = "abcdefghijklmnopqrstuvwxyz" + "0123456789";
             Random random = new Random();
 
             String result = "";

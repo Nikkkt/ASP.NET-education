@@ -6,4 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Uploads\Product\" />
+    <Folder Include="wwwroot\img\upload\" />
+  </ItemGroup>
+
 </Project>
