@@ -1,7 +1,9 @@
+using ASP.NET_Classwork.Data;
 using ASP.NET_Classwork.Services.FileName;
 using ASP.NET_Classwork.Services.Hash;
 using ASP.NET_Classwork.Services.KDF;
 using ASP.NET_Classwork.Services.OTP;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +34,9 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Реєструємо контекст даних
+builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("LocalDb")));
 
 var app = builder.Build();
 

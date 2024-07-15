@@ -1,8 +1,10 @@
+using ASP.NET_Classwork.Data;
 using ASP.NET_Classwork.Models;
 using ASP.NET_Classwork.Models.Home;
 using ASP.NET_Classwork.Models.Product;
 using ASP.NET_Classwork.Services.FileName;
 using ASP.NET_Classwork.Services.Hash;
+using ASP.NET_Classwork.Services.KDF;
 using ASP.NET_Classwork.Services.OTP;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,18 +26,24 @@ namespace ASP.NET_Classwork.Controllers
 
         private readonly IFileNameService _fileNameService;
 
+        private readonly DataContext _dataContext;
+
+        private readonly IKdfService _kdfService;
+
         private String fileErrorKey = "file-error";
         private String fileNameKey = "file-name";
 
         private String productFileErrorKey = "file-error";
         private String productFileNameKey = "file-name";
 
-        public HomeController(ILogger<HomeController> logger, IHashService hashService, IOtpService otpService, IFileNameService fileNameService)
+        public HomeController(ILogger<HomeController> logger, IHashService hashService, IOtpService otpService, IFileNameService fileNameService, DataContext dataContext, IKdfService kdfService)
         {
             _logger = logger;
             _hashService = hashService;
             _otpService = otpService;
             _fileNameService = fileNameService;
+            _dataContext = dataContext;
+            _kdfService = kdfService;
             // Інжекція через конструктор - найбільш рекомендований варіант
             // Контейнер служб (інжектор) аналізує параметри конструктора і сам підставляє до нього необхідні об'єкти (інстанси) служб
         }
@@ -86,6 +94,25 @@ namespace ASP.NET_Classwork.Controllers
 
                 model.FormModel = formModel;
                 model.ValidationErrors = _Validate(formModel);
+
+                ////////////
+                if (model.ValidationErrors.Where(p => p.Value != null).Count() == 0)
+                {
+                    // немає помилок валідації - реєструємо у бд
+                    String salt = _hashService.Digest(_fileNameService.GenerateFileName(20));
+                    _dataContext.Users.Add(new() 
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = formModel.UserName,
+                        Email = formModel.UserEmail,
+                        Salt = salt,
+                        Dk = _kdfService.DerivedKey(formModel.UserPassword, salt),
+                        Registered = DateTime.Now,
+                        Avatar = HttpContext.Session.GetString(fileNameKey)
+                    });
+                    _dataContext.SaveChanges();
+                }
+                ////////////
 
                 ViewData["data"] = $"email: {formModel.UserEmail}, name: {formModel.UserName}";
 
@@ -139,7 +166,7 @@ namespace ASP.NET_Classwork.Controllers
                     {
                         // 3. Сформувати ім'я файлу, переконатись, що ми не перекривається наявний файл
                         String filename;
-                        String path = "./Uploads/User"; // "./wwwroot/img/upload/";
+                        String path = "./Uploads/User/"; // "./wwwroot/img/upload/";
                         do
                         {
                             filename = new FileNameService().GenerateFileName(16) + ext;
@@ -180,6 +207,20 @@ namespace ASP.NET_Classwork.Controllers
 
                 model.FormModel = formModel;
                 model.ValidationErrors = _ValidateProduct(formModel);
+
+                if (model.ValidationErrors.Where(p => p.Value != null).Count() == 0)
+                {
+                    _dataContext.Products.Add(new()
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = formModel.Name,
+                        Description = formModel.Description,
+                        Price = formModel.Price,
+                        Amount = formModel.Amount,
+                        Picture = HttpContext.Session.GetString(fileNameKey)
+                    });
+                    _dataContext.SaveChanges();
+                }
 
                 ViewData["productData"] = $"name: {formModel.Name}, description: {formModel.Description}, price: {formModel.Price}, amount: {formModel.Amount}";
 
