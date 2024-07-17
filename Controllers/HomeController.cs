@@ -9,6 +9,7 @@ using ASP.NET_Classwork.Services.OTP;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -107,8 +108,9 @@ namespace ASP.NET_Classwork.Controllers
                         Email = formModel.UserEmail,
                         Salt = salt,
                         Dk = _kdfService.DerivedKey(formModel.UserPassword, salt),
+                        Birthdate = DateTime.ParseExact(formModel.UserBirthday, "dd-MM-yyyy", CultureInfo.InvariantCulture),
                         Registered = DateTime.Now,
-                        Avatar = HttpContext.Session.GetString(fileNameKey)
+                        Avatar = HttpContext.Session.GetString(fileNameKey),
                     });
                     _dataContext.SaveChanges();
                 }
@@ -370,6 +372,8 @@ namespace ASP.NET_Classwork.Controllers
 
             res[nameof(model.isAgree)] = model.isAgree ? null : "Необхідно прийняти правила сайту";
 
+            res[nameof(model.UserBirthday)] = String.IsNullOrEmpty(model.UserBirthday) ? "Не допускається порожнє поле" : CheckDate(model.UserBirthday) ? null : "Помилка у введені дати";
+
             // результати перевірки файлу збережені у сесії
             if (HttpContext.Session.Keys.Contains(fileErrorKey))
             {
@@ -378,6 +382,25 @@ namespace ASP.NET_Classwork.Controllers
             }
 
             return res;
+        }
+
+        private Boolean CheckDate(String date)
+        {
+            DateTime dateValue;
+            Boolean isValid = DateTime.TryParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateValue);
+
+            if (isValid)
+            {
+                if (dateValue.Month == 2 && dateValue.Day > 28)
+                {
+                    if (dateValue.Day == 29 && DateTime.IsLeapYear(dateValue.Year)) return true;
+                    return false;
+                }
+                if ((dateValue.Month == 4 || dateValue.Month == 6 || dateValue.Month == 9 || dateValue.Month == 11) && dateValue.Day > 30) return false;
+                if (dateValue.Day > 31) return false;
+            }
+
+            return isValid;
         }
     }
 }

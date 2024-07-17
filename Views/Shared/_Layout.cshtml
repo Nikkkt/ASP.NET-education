@@ -27,6 +27,9 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+                    <button type="button" class="btn btn-outline-secondary mx-2" data-bs-toggle="modal" data-bs-target="#authModal">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </button>
                     <a asp-action="SignUp" title="Реєстрація" class="btn btn-outline-secondary"><i class="bi bi-person-circle"></i></a>
                 </div>
             </div>
@@ -43,6 +46,37 @@
             &copy; 2024 - ASP.NET_Classwork - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="authModalLabel">Автентифікація</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="auth-email-addon"><i class="bi bi-at"></i></span>
+                            <input type="text" class="form-control" placeholder="Ел. пошта / ім'я / дата народження" name="auth-user-email" aria-label="Ел. пошта / ім'я / дата народження" aria-describedby="auth-email-addon" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="auth-password-addon"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="auth-user-password" class="form-control" placeholder="Пароль" aria-label="Пароль" aria-describedby="auth-password-addon" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="alert alert-danger" role="alert" id="auth-error" style="visibility:hidden"></div>
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Закрити</button>
+                    <button type="button" class="btn btn-outline-success" id="auth-button">Вхід</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

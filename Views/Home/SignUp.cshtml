@@ -83,6 +83,24 @@
             </div>
         </div>
         <div class="col col-6">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="birthday-addon"><i class="bi bi-calendar-event"></i></span>
+                @{
+                    String birthdayClass = Model.ValidationErrors == null ? String.Empty : Model.ValidationErrors?[nameof(Model.FormModel.UserBirthday)] == null ? "is-valid" : "is-invalid";
+                }
+                <input name="user-birthday" type="text" class="form-control @birthdayClass" placeholder="Дата народження (ДД-ММ-РРРР)" aria-label="Дата народження (ДД-ММ-РРРР)" aria-describedby="birthday-addon">
+                @if (!String.IsNullOrEmpty(Model.ValidationErrors?[nameof(Model.FormModel.UserBirthday)]))
+                {
+                    <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                        @Model.ValidationErrors?[nameof(Model.FormModel.UserBirthday)]
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col col-6"></div>
+        <div class="col col-6">
             <div class="d-flex justify-content-between">
                 <div class="form-check form-switch">
                     @{
@@ -101,7 +119,9 @@
             </div>
         </div>
     </div>
+
 </form>
+
 
 @if (ViewData["data"] == null)
 {

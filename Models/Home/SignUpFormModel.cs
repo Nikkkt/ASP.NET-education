@@ -23,6 +23,9 @@ namespace ASP.NET_Classwork.Models.Home
 
         [FromForm(Name = "is-agree")]
         public Boolean isAgree { get; set; } = false;
+
+        [FromForm(Name = "user-birthday")]
+        public String UserBirthday { get; set; } = null;
     }
 }
 
