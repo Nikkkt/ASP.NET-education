@@ -1,4 +1,5 @@
 using ASP.NET_Classwork.Data;
+using ASP.NET_Classwork.Middleware.SessionAuth;
 using ASP.NET_Classwork.Services.FileName;
 using ASP.NET_Classwork.Services.Hash;
 using ASP.NET_Classwork.Services.KDF;
@@ -30,7 +31,7 @@ builder.Services.AddTransient<IFileNameService, FileNameService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.IdleTimeout = TimeSpan.FromMinutes(10);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -49,12 +50,12 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.UseSession();
+
+// อเ๘ณ Middleware
+app.UseSessionAuth();
 
 app.MapControllerRoute(
     name: "default",

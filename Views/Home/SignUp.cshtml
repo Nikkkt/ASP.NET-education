@@ -123,18 +123,9 @@
 </form>
 
 
-@if (ViewData["data"] == null)
-{
-    <p>Немає попередніх даних</p>
-}
-else
-{
-    <p>@ViewData["data"]</p>
-}
-
 @if (ViewData["avatar"] != null)
 {
-    <img src="/Home/Download/@(ViewData["avatar"])" alt="Avatar" />
+    <img src="/Home/Download/@(ViewData["avatar"])" alt="Avatar" style="height: 100px"/>
 }
 
 @if (Model.ValidationErrors != null)

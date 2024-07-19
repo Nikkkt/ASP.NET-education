@@ -43,9 +43,9 @@ function authClick() {
     }).then(r => r.json()).then(j => {
         console.log(j);
         if (j.code != 200) {
-            errorDiv.show("Відмова. Перевірьте введені дані")
+            errorDiv.show("Відмова. Перевірьте введені дані");
         } else {
-            errorDiv.show("ОК")
+            window.location.reload();
         }
     });
 }

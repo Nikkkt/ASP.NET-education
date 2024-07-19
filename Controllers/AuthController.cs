@@ -1,7 +1,9 @@
 ﻿using ASP.NET_Classwork.Data;
+using ASP.NET_Classwork.Data.Entities;
 using ASP.NET_Classwork.Services.KDF;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace ASP.NET_Classwork.Controllers
@@ -44,12 +46,40 @@ namespace ASP.NET_Classwork.Controllers
             // Розшифрувати DK неможливо, тому повторюємо розрахунок DK з сіллю, що зберігається у користувача, та паролем, який був переданий
             if (user != null && _kdfService.DerivedKey(password, user.Salt) == user.Dk)
             {
-                return new
+                var activeToken = _dataContext.Tokens.FirstOrDefault(t => t.UserId == user.Id && t.ExpiresAt > DateTime.Now);
+
+                if (activeToken != null)
                 {
-                    status = "Ok",
-                    code = 200,
-                    message = "Authenticated"
-                };
+                    HttpContext.Session.SetString("token", activeToken.Id.ToString());
+                    return new
+                    {
+                        status = "Ok",
+                        code = 200,
+                        message = activeToken.Id
+                    };
+                }
+                else
+                {
+                    // Генеруємо новий токен
+                    Token token = new()
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id,
+                        ExpiresAt = DateTime.Now.AddMinutes(2)
+                    };
+
+                    _dataContext.Tokens.Add(token);
+                    _dataContext.SaveChanges();
+
+                    // Зберігаємо токен у сесії
+                    HttpContext.Session.SetString("token", token.Id.ToString());
+                    return new
+                    {
+                        status = "Ok",
+                        code = 200,
+                        message = token.Id // передаємо новий токен клієнту
+                    };
+                }
             }
             else
             {
@@ -73,3 +103,13 @@ namespace ASP.NET_Classwork.Controllers
 //       GET  /api/auth  -> DoGet()
 //       POST /api/auth  -> DoPost()
 //       PUT  /api/auth  -> DoPut()
+
+// Кодування - переведення символів однієї абетки у символи іншої абетки (на відміну від шифрування - без секретів)
+// Розрізняють символьні та транспортні кодування
+// Символьні - таблиці код-символ ASCII, UTF-8
+// Транспортні - для усунення спец. символів, що вживаються у протоколах (?, &, ...)
+
+// Токени авоторизації
+// Токен - "жетон", "перепустка" - дані, що видаються як результат автентифікації і далі використовується для "підтвердження особи" - авторизації
+
+// 
